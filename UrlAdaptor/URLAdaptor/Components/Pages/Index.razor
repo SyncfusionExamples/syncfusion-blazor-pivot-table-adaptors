@@ -1,0 +1,41 @@
+﻿@page "/"
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.PivotView
+@using URLAdaptor.Models
+
+<SfPivotView TValue="OrdersDetails" Width="1000" Height="300" ShowFieldList="true">
+    <PivotViewDataSourceSettings TValue="OrdersDetails" ExpandAll=false EnableSorting=true>
+    <SfDataManager Url="http://localhost:5145/api/orders" InsertUrl="http://localhost:5145/api/orders/Insert" UpdateUrl="http://localhost:5145/api/orders/Update" RemoveUrl="http://localhost:5145/api/orders/Remove" Adaptor="Adaptors.UrlAdaptor"></SfDataManager>
+        <PivotViewColumns>
+            <PivotViewColumn Name="OrderID"></PivotViewColumn>
+        </PivotViewColumns>
+        <PivotViewRows>
+            <PivotViewRow Name="CustomerID"></PivotViewRow>
+        </PivotViewRows>
+        <PivotViewValues>
+            <PivotViewValue Name="Freight" Caption="Freight"></PivotViewValue>
+        </PivotViewValues>
+    </PivotViewDataSourceSettings>
+    <PivotViewGridSettings ColumnWidth="120"></PivotViewGridSettings>
+    <PivotViewEvents TValue="OrdersDetails" BeginDrillThrough="beginDrillThrough"></PivotViewEvents>
+    <PivotViewCellEditSettings AllowEditing=true AllowAdding=true AllowDeleting=true Mode=Syncfusion.Blazor.PivotView.EditMode.Normal></PivotViewCellEditSettings>
+</SfPivotView>
+
+@code{
+    private void beginDrillThrough(BeginDrillThroughEventArgs args)
+    {
+        // Configure beginDrillThrough event to set the primary key for CRUD operations
+        // Iterate through all columns in the drill-through grid
+        for (int i = 0; i < args.GridObj.Columns.Count; i++)
+        {
+            // Check if the current column is the primary key column
+            if (args.GridObj.Columns[i].Field == "OrderID")
+            {
+                // Mark this column as the primary key
+                // This tells DataManager to use this column's value to uniquely identify records
+                args.GridObj.Columns[i].IsPrimaryKey = true;
+            }
+        }
+    }
+
+}
