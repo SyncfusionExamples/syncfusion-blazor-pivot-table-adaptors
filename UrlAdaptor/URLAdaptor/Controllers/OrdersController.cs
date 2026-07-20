@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor;
 using URLAdaptor.Models;
@@ -26,55 +26,55 @@ namespace URLAdaptor.Controllers
         /// <returns>Returns a response containing the processed data and the total record count.</returns>
         [HttpPost]
         [Route("api/[controller]")]
-        public object Post([FromBody] DataManagerRequest DataManagerRequest)
+        public object Post([FromBody] DataManagerRequest dataManagerRequest)
         {
             // Retrieve data from the data source (e.g., database).
-            IQueryable<OrdersDetails> DataSource = GetOrderData().AsQueryable();    
+            IQueryable<OrdersDetails> dataSource = GetOrderData().AsQueryable();
 
             // Handling searching operation.
-            if (DataManagerRequest.Search != null && DataManagerRequest.Search.Count > 0)
+            if (dataManagerRequest.Search != null && dataManagerRequest.Search.Count > 0)
             {
-                DataSource = DataOperations.PerformSearching(DataSource, DataManagerRequest.Search);
+                dataSource = DataOperations.PerformSearching(dataSource, dataManagerRequest.Search);
                 // Add custom logic here if needed and remove above method.
             }
 
             // Handling filtering operation.
-            if (DataManagerRequest.Where != null && DataManagerRequest.Where.Count > 0)
+            if (dataManagerRequest.Where != null && dataManagerRequest.Where.Count > 0)
             {
-                foreach (var condition in DataManagerRequest.Where)
+                foreach (var condition in dataManagerRequest.Where)
                 {
                     foreach (var predicate in condition.predicates)
                     {
-                        DataSource = DataOperations.PerformFiltering(DataSource, DataManagerRequest.Where, predicate.Operator);
+                        dataSource = DataOperations.PerformFiltering(dataSource, dataManagerRequest.Where, predicate.Operator);
                         // Add custom logic here if needed and remove above method.
                     }
-                }                
+                }
             }
 
             // Handling sorting operation.
-            if (DataManagerRequest.Sorted != null && DataManagerRequest.Sorted.Count > 0)
+            if (dataManagerRequest.Sorted != null && dataManagerRequest.Sorted.Count > 0)
             {
-                DataSource = DataOperations.PerformSorting(DataSource, DataManagerRequest.Sorted);
+                dataSource = DataOperations.PerformSorting(dataSource, dataManagerRequest.Sorted);
                 // Add custom logic here if needed and remove above method.
             }
 
             // Get the total records count.
-            int totalRecordsCount = DataSource.Count();
+            int totalRecordsCount = dataSource.Count();
 
             // Handling paging operation.
-            if (DataManagerRequest.Skip != 0)
+            if (dataManagerRequest.Skip != 0)
             {
-                DataSource = DataOperations.PerformSkip(DataSource, DataManagerRequest.Skip);
+                dataSource = DataOperations.PerformSkip(dataSource, dataManagerRequest.Skip);
                 // Add custom logic here if needed and remove above method.
             }
-            if (DataManagerRequest.Take != 0)
+            if (dataManagerRequest.Take != 0)
             {
-                DataSource = DataOperations.PerformTake(DataSource, DataManagerRequest.Take);
+                dataSource = DataOperations.PerformTake(dataSource, dataManagerRequest.Take);
                 // Add custom logic here if needed and remove above method.
             }
 
             // Return data based on the request.
-            return new { result = DataSource, count = totalRecordsCount };
+            return new { result = dataSource, count = totalRecordsCount };
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace URLAdaptor.Controllers
             var updatedOrder = updatedRecord.value;
             if (updatedOrder != null)
             {
-                var data = OrdersDetails.GetAllRecords().FirstOrDefault(or => or.OrderID == updatedOrder.OrderID);
+                var data = OrdersDetails.GetAllRecords().FirstOrDefault(order => order.OrderID == updatedOrder.OrderID);
                 if (data != null)
                 {
                     // Update the existing record.
@@ -128,7 +128,7 @@ namespace URLAdaptor.Controllers
         public void Remove([FromBody] CRUDModel<OrdersDetails> deletedRecord)
         {
             // Get the key value from the deletedRecord.
-            int orderId = int.Parse(deletedRecord.key.ToString());
+            int orderId = int.Parse(deletedRecord.key?.ToString() ?? "0");
             var data = OrdersDetails.GetAllRecords().FirstOrDefault(orderData => orderData.OrderID == orderId);
             if (data != null)
             {
@@ -150,7 +150,7 @@ namespace URLAdaptor.Controllers
             if (request.action == "update")
             {
                 var orderValue = request.value;
-                OrdersDetails existingRecord = OrdersDetails.GetAllRecords().FirstOrDefault(or => or.OrderID == orderValue.OrderID);
+                OrdersDetails existingRecord = OrdersDetails.GetAllRecords().FirstOrDefault(order => order.OrderID == orderValue?.OrderID);
                 if (existingRecord != null)
                 {
                     // Update the properties of the existing record.
@@ -171,7 +171,7 @@ namespace URLAdaptor.Controllers
             else if (request.action == "remove")
             {
                 // Remove the record from the data collection.
-                OrdersDetails.GetAllRecords().Remove(OrdersDetails.GetAllRecords().FirstOrDefault(or => or.OrderID == int.Parse(request.key.ToString())));
+                OrdersDetails.GetAllRecords().Remove(OrdersDetails.GetAllRecords().FirstOrDefault(order => order.OrderID == int.Parse(request.key?.ToString() ?? "0")));
             }
         }
 
@@ -188,10 +188,10 @@ namespace URLAdaptor.Controllers
             if (batchModel.added != null)
             {
                 // Iterate through each added record.
-                foreach (var Record in batchModel.added)
+                foreach (var record in batchModel.added)
                 {
                     // Insert the added record at the beginning of the existing records.
-                    OrdersDetails.GetAllRecords().Insert(0, Record);
+                    OrdersDetails.GetAllRecords().Insert(0, record);
                 }
             }
             // Check if there are any changed records in the batch model.
@@ -201,7 +201,7 @@ namespace URLAdaptor.Controllers
                 foreach (var changedOrder in batchModel.changed)
                 {
                     // Find the existing record that matches the changed record's OrderID.
-                    var existingOrder = OrdersDetails.GetAllRecords().FirstOrDefault(or => or.OrderID == changedOrder.OrderID);
+                    var existingOrder = OrdersDetails.GetAllRecords().FirstOrDefault(order => order.OrderID == changedOrder.OrderID);
                     if (existingOrder != null)
                     {
                         // Update the properties of the existing record.
@@ -220,7 +220,7 @@ namespace URLAdaptor.Controllers
                 foreach (var deletedOrder in batchModel.deleted)
                 {
                     // Find the existing record that matches the deleted record's OrderID.
-                    var orderToDelete = OrdersDetails.GetAllRecords().FirstOrDefault(or => or.OrderID == deletedOrder.OrderID);
+                    var orderToDelete = OrdersDetails.GetAllRecords().FirstOrDefault(order => order.OrderID == deletedOrder.OrderID);
                     if (orderToDelete != null)
                     {
                         // Remove the matching record from the existing records.
