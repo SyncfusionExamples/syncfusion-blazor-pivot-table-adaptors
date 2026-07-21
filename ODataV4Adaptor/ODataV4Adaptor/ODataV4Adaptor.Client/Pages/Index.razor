@@ -1,0 +1,42 @@
+﻿@page "/"
+
+@using Syncfusion.Blazor.PivotView
+@using Syncfusion.Blazor.Data
+@using ODataV4Adaptor.Client.Models
+
+<SfPivotView TValue="OrdersDetails" Width="1000" Height="300" ShowFieldList="true">
+    <PivotViewDataSourceSettings TValue="OrdersDetails" ExpandAll=false EnableSorting=true>
+    <SfDataManager Url="http://localhost:5217/odata/orders" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
+        <PivotViewColumns>
+            <PivotViewColumn Name="OrderID"></PivotViewColumn>
+        </PivotViewColumns>
+        <PivotViewRows>
+            <PivotViewRow Name="ShipCountry"></PivotViewRow>
+        </PivotViewRows>
+        <PivotViewValues>
+            <PivotViewValue Name="EmployeeID"></PivotViewValue>
+        </PivotViewValues>
+    </PivotViewDataSourceSettings>
+    <PivotViewGridSettings ColumnWidth="120"></PivotViewGridSettings>
+    <PivotViewEvents TValue="OrdersDetails" BeginDrillThrough="beginDrillThrough"></PivotViewEvents>
+    <PivotViewCellEditSettings AllowEditing=true AllowAdding=true AllowDeleting=true Mode=Syncfusion.Blazor.PivotView.EditMode.Normal></PivotViewCellEditSettings>
+</SfPivotView>
+
+@code{
+    private void beginDrillThrough(BeginDrillThroughEventArgs args)
+    {
+        // Configure beginDrillThrough event to set the primary key for CRUD operations
+        // Iterate through all columns in the drill-through pivot
+        for (int i = 0; i < args.GridObj.Columns.Count; i++)
+        {
+            // Check if the current column is the primary key column
+            if (args.GridObj.Columns[i].Field == "OrderID")
+            {
+                // Mark this column as the primary key
+                // This tells DataManager to use this column's value to uniquely identify records
+                args.GridObj.Columns[i].IsPrimaryKey = true;
+            }
+        }
+    }
+
+}
