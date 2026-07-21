@@ -31,7 +31,7 @@ This repository demonstrates a production-ready pattern for binding **GraphQL** 
    git clone <repository-url>
    cd "syncfusion-blazor-pivot-table-remote-data-binding"
    
-   cd "GraphQLAdaptor/Pivot_GraphQLAdaptor"
+   cd "GraphQLAdaptor"
    ```
 
 2. **Restore packages and build**
@@ -183,7 +183,7 @@ Refer to the [Full Documentation](#full-documentation) for complete GraphQL adap
 
 - Align HotChocolate.AspNetCore and Syncfusion package versions
 - Run `dotnet restore` to update NuGet packages
-- Check the `Pivot_GraphQLAdaptor.csproj` file for conflicting version constraints
+- Check the `GraphQLAdaptor.csproj` file for conflicting version constraints
 - Verify all packages are compatible with .NET 8.0 or later
 
 ### Port Already in Use

@@ -1,5 +1,5 @@
-using Pivot_GraphQLAdaptor.Components;
-using Pivot_GraphQLAdaptor.Models;
+using GraphQLAdaptor.Components;
+using GraphQLAdaptor.Models;
 using Syncfusion.Blazor;
 var builder = WebApplication.CreateBuilder(args);
 

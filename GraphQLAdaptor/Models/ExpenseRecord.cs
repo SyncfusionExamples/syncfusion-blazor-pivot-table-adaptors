@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Pivot_GraphQLAdaptor.Models
+namespace GraphQLAdaptor.Models
 {
     public class ExpenseRecord
     {

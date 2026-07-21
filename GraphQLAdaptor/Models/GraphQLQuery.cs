@@ -1,4 +1,4 @@
-namespace Pivot_GraphQLAdaptor.Models
+namespace GraphQLAdaptor.Models
 {
     public class GraphQLQuery
     {
