@@ -12,13 +12,5 @@
     <PackageReference Include="Syncfusion.Blazor.Data" Version="34.1.29" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="34.1.29" />
   </ItemGroup>
-<!-- 
-  <ItemGroup>
-    <ProjectReference Include="..\Blaz_Dev\blazor-pivot-components\src\Syncfusion.Blazor.PivotTable.csproj" />
-  </ItemGroup> -->
-<!-- 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Development_Pivot_src\blazor-pivot-components\src\Syncfusion.Blazor.PivotTable.csproj" />
-  </ItemGroup> -->
 
 </Project>

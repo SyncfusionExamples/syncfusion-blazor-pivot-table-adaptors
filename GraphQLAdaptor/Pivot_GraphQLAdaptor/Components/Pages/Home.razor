@@ -1,0 +1,95 @@
+@page "/"
+@using System.IO;
+<PageTitle>Expense Tracker</PageTitle>
+
+<SfPivotView TValue="ExpenseRecord" Width="1000" Height="600" ShowFieldList="true">
+    <PivotViewDataSourceSettings TValue="ExpenseRecord" ExpandAll=false EnableSorting=true>
+        <SfDataManager Url="http://localhost:5272/graphql" GraphQLAdaptorOptions="@adaptorOptions" Adaptor="Adaptors.GraphQLAdaptor"></SfDataManager>
+        <PivotViewColumns>
+            <PivotViewColumn Name="ExpenseId"></PivotViewColumn>
+        </PivotViewColumns>
+        <PivotViewRows>
+            <PivotViewRow Name="Department"></PivotViewRow>
+        </PivotViewRows>
+        <PivotViewValues>
+            <PivotViewValue Name="Amount" Caption="Amount"></PivotViewValue>
+        </PivotViewValues>
+    </PivotViewDataSourceSettings>
+    <PivotViewGridSettings ColumnWidth="120"></PivotViewGridSettings>
+    <PivotViewEvents TValue="ExpenseRecord" BeginDrillThrough="beginDrillThrough"></PivotViewEvents>
+    <PivotViewCellEditSettings AllowEditing=true AllowAdding=true AllowDeleting=true Mode=Syncfusion.Blazor.PivotView.EditMode.Normal></PivotViewCellEditSettings>
+</SfPivotView>
+
+@code {
+    private GraphQLAdaptorOptions adaptorOptions = new GraphQLAdaptorOptions
+    {
+        Query = @"query expenseRecordData($dataManager: DataManagerRequestInput!) {
+                    expenseRecordData(dataManager: $dataManager) {
+                        count
+                        result {
+                            expenseId
+                            department
+                            category
+                            amount
+                        }
+                    }
+                }",
+        ResolverName = "expenseRecordData",
+        Mutation = new Syncfusion.Blazor.Data.GraphQLMutation
+        {
+            Insert = @"mutation create($record: ExpenseRecordInput!, $index: Int!, $action: String!, $additionalParameters: Any) {
+                createExpense(record: $record, index: $index, action: $action, additionalParameters: $additionalParameters) {
+                    expenseId
+                    department
+                    category
+                    amount
+                }
+            }",
+            Update = @"mutation update($record: ExpenseRecordInput!, $action: String!, $primaryColumnName: String!, $primaryColumnValue: String!, $additionalParameters: Any) {
+                updateExpense(record: $record, action: $action, primaryColumnName: $primaryColumnName, primaryColumnValue: $primaryColumnValue, additionalParameters: $additionalParameters) {
+                    expenseId
+                    department
+                    category
+                    amount
+                }
+            }",
+            Delete = @"mutation delete($primaryColumnValue: String!, $additionalParameters: Any) {
+                deleteExpense(primaryColumnValue: $primaryColumnValue, additionalParameters: $additionalParameters)
+            }",
+            Batch = @"mutation batch($changed: [ExpenseRecordInput!], $added: [ExpenseRecordInput!], $deleted: [ExpenseRecordInput!], $action: String!, $primaryColumnName: String!, $additionalParameters: Any, $dropIndex: Int) {
+                batchUpdate(changed: $changed, added: $added, deleted: $deleted, action: $action, primaryColumnName: $primaryColumnName, additionalParameters: $additionalParameters, dropIndex: $dropIndex) {
+                    expenseId
+                    department
+                    category
+                    amount
+                }
+            }"
+        },
+    };
+
+    private void beginDrillThrough(BeginDrillThroughEventArgs args)
+    {
+        // Configure beginDrillThrough event to set the primary key for CRUD operations
+        // Iterate through all columns in the drill-through grid
+        for (int i = 0; i < args.GridObj.Columns.Count; i++)
+        {
+            // Check if the current column is the primary key column
+            if (args.GridObj.Columns[i].Field == "ExpenseId")
+            {
+                // Mark this column as the primary key
+                // This tells DataManager to use this column's value to uniquely identify records
+                args.GridObj.Columns[i].IsPrimaryKey = true;
+            }
+        }
+    }
+    // Lookup data
+    private List<string> DepartmentOptions = new()
+    {
+        "Finance", "HR & People", "Engineering", "Marketing", "Sales", "Operations"
+    };
+
+    private List<string> CategoryOptions = new()
+    {
+        "Travel & Mileage", "Meals & Entertainment", "Office Supplies", "Training & Education", "Software & SaaS", "Lodging"
+    };
+}
