@@ -1,0 +1,181 @@
+﻿@page "/"
+
+@using Syncfusion.Blazor.PivotView
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Calendars
+
+<SfPivotView TValue="OrderData" Width="1000" Height="300" ShowFieldList="true">
+    <PivotViewDataSourceSettings TValue="OrderData" ExpandAll=false EnableSorting=true>
+        <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+        <PivotViewColumns>
+            <PivotViewColumn Name="OrderID"></PivotViewColumn>
+        </PivotViewColumns>
+        <PivotViewRows>
+            <PivotViewRow Name="CustomerID"></PivotViewRow>
+        </PivotViewRows>
+        <PivotViewValues>
+            <PivotViewValue Name="Freight" Caption="Freight"></PivotViewValue>
+        </PivotViewValues>
+    </PivotViewDataSourceSettings>
+    <PivotViewGridSettings ColumnWidth="120"></PivotViewGridSettings>
+    <PivotViewEvents TValue="OrderData" BeginDrillThrough="BeginDrillThrough"></PivotViewEvents>
+    <PivotViewCellEditSettings AllowEditing=true AllowAdding=true AllowDeleting=true Mode=Syncfusion.Blazor.PivotView.EditMode.Normal></PivotViewCellEditSettings>
+</SfPivotView>
+
+@code {
+    private SfPivotView<OrderData> Grid;
+    public List<OrderData> Orders { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Orders = OrderData.GetAllRecords();
+    }
+
+    private void BeginDrillThrough(BeginDrillThroughEventArgs args)
+    {
+        // Configure BeginDrillThrough event to set the primary key for CRUD operations
+        // Iterate through all columns in the drill-through grid
+        for (int index = 0; index < args.GridObj.Columns.Count; index++)
+        {
+            // Check if the current column is the primary key column
+            if (args.GridObj.Columns[index].Field == "OrderID")
+            {
+                // Mark this column as the primary key
+                // This tells DataManager to use this column's value to uniquely identify records
+                args.GridObj.Columns[index].IsPrimaryKey = true;
+            }
+        }
+    }
+
+    public class CustomAdaptor : DataAdaptor
+    {
+        public override object Read(DataManagerRequest dm, string key = null)
+        {
+            IEnumerable<OrderData> dataSource = OrderData.GetAllRecords();
+
+            int count = dataSource.Cast<OrderData>().Count();
+
+            if (dm.Skip != 0)
+                dataSource = DataOperations.PerformSkip(dataSource, dm.Skip);
+
+            if (dm.Take != 0)
+                dataSource = DataOperations.PerformTake(dataSource, dm.Take);
+
+            return dm.RequiresCounts
+                ? new DataResult() { Result = dataSource, Count = count }
+                : (object)dataSource;
+        }
+
+        public override object Insert(DataManager dataManager, object record, string additionalParam)
+        {
+            if (record == null)
+            {
+                return "no record";
+            }
+
+            OrderData newRecord;
+
+            // The Pivot Table drill-through posts the new row as a Dictionary<string, object>
+            // (it is not a strongly-typed OrderData instance), so we must handle both cases.
+            if (record is OrderData orderData)
+            {
+                newRecord = orderData;
+            }
+            else if (record is IDictionary<string, object> dict)
+            {
+                newRecord = new OrderData
+                {
+                    OrderID = dict.ContainsKey("OrderID") && dict["OrderID"] != null
+                        ? Convert.ToInt32(dict["OrderID"])
+                        : (int?)null,
+                    CustomerID = dict.ContainsKey("CustomerID") ? dict["CustomerID"]?.ToString() : null,
+                    EmployeeID = dict.ContainsKey("EmployeeID") && dict["EmployeeID"] != null
+                        ? Convert.ToInt32(dict["EmployeeID"])
+                        : (int?)null,
+                    Freight = dict.ContainsKey("Freight") && dict["Freight"] != null
+                        ? Convert.ToDouble(dict["Freight"])
+                        : (double?)null
+                };
+            }
+            else
+            {
+                // Unknown payload shape - cannot insert
+                return "no record";
+            }
+
+            // Auto-generate a unique primary key for the new record when not provided
+            if (!newRecord.OrderID.HasValue || newRecord.OrderID == 0)
+            {
+                var existingIds = OrderData.GetAllRecords()
+                    .Where(o => o.OrderID.HasValue)
+                    .Select(o => o.OrderID!.Value)
+                    .ToList();
+                newRecord.OrderID = existingIds.Count > 0 ? existingIds.Max() + 1 : 1;
+            }
+
+            // Insert the new record at the beginning of the data source
+            OrderData.GetAllRecords().Insert(0, newRecord);
+
+            return newRecord;
+        }
+        public override object Update(DataManager dataManager, object updateRecord, string primaryColumnName, string additionalParam)
+        {
+            // The Pivot Table drill-through posts the edited row as a Dictionary<string, object>
+            // (it is not a strongly-typed OrderData instance), so we must handle both cases.
+            OrderData? updatedOrder = updateRecord as OrderData;
+            int? primaryKeyValue = null;
+
+            if (updatedOrder != null)
+            {
+                primaryKeyValue = updatedOrder.OrderID;
+            }
+            else if (updateRecord is IDictionary<string, object> dict)
+            {
+                updatedOrder = new OrderData();
+                if (dict.ContainsKey("OrderID") && dict["OrderID"] != null)
+                {
+                    updatedOrder.OrderID = Convert.ToInt32(dict["OrderID"]);
+                    primaryKeyValue = updatedOrder.OrderID;
+                }
+                if (dict.ContainsKey("CustomerID"))
+                    updatedOrder.CustomerID = dict["CustomerID"]?.ToString();
+                if (dict.ContainsKey("EmployeeID") && dict["EmployeeID"] != null)
+                    updatedOrder.EmployeeID = Convert.ToInt32(dict["EmployeeID"]);
+                if (dict.ContainsKey("Freight") && dict["Freight"] != null)
+                    updatedOrder.Freight = Convert.ToDouble(dict["Freight"]);
+            }
+
+            if (updatedOrder != null && primaryKeyValue.HasValue)
+            {
+                // Retrieve the existing order based on the primary key
+                var existingOrder = OrderData.GetAllRecords()
+                    .FirstOrDefault(order => order.OrderID == primaryKeyValue.Value);
+
+                if (existingOrder != null)
+                {
+                    // Update properties if they are not null or default
+                    if (updatedOrder.CustomerID != null) existingOrder.CustomerID = updatedOrder.CustomerID;
+                    if (updatedOrder.EmployeeID.HasValue) existingOrder.EmployeeID = updatedOrder.EmployeeID;
+                    if (updatedOrder.OrderID.HasValue) existingOrder.OrderID = updatedOrder.OrderID;
+                    if (updatedOrder.Freight.HasValue) existingOrder.Freight = updatedOrder.Freight;
+                    // existingOrder.Verified = updatedOrder.Verified;
+                }
+            }
+
+            // Call the base method to complete the update process
+            return (updateRecord);
+        }
+        public override object Remove(DataManager dataManager, object primaryColumnValue, string primaryColumnName, string additionalParam)
+        {
+            int orderId = int.Parse(primaryColumnValue.ToString());
+            var data = OrderData.GetAllRecords().FirstOrDefault(orderData => orderData.OrderID == orderId);
+            if (data != null)
+            {
+                // Remove the record from the data collection
+                OrderData.GetAllRecords().Remove(data);
+            }
+            return (primaryColumnValue);
+        }
+    }
+}
