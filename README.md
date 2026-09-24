@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository demonstrates how to bind data from various remote services to a **Syncfusion Blazor Pivot Table**. It provides examples of integrating data using different adaptors and showcases techniques for handling aggregation, filtering, sorting, paging, drill-through, and CRUD operations within Blazor applications. By exploring this repository, you will learn how to efficiently manage and analyze large volumes of data in your applications.
+This repository demonstrates how to bind data from various remote services to a **Syncfusion [Blazor Pivot Table](https://www.syncfusion.com/blazor-components/blazor-pivot-table)**. It provides examples of integrating data using different adaptors and showcases techniques for handling aggregation, filtering, sorting, paging, drill-through, and CRUD operations within Blazor applications. By exploring this repository, you will learn how to efficiently manage and analyze large volumes of data in your applications.
 
 ## Features
 
@@ -93,3 +93,12 @@ You can also refer the below resources to know more details about Syncfusion Bla
 * [Demo](https://blazor.syncfusion.com/demos/pivot-table/overview?theme=fluent2)
 * [Documentation](https://blazor.syncfusion.com/documentation/pivot-table/getting-started)
 * [Connecting to adaptors](https://blazor.syncfusion.com/documentation/pivot-table/connecting-to-adaptors)
+
+## Support and Feedback
+
+- For general product questions, visit the [Syncfusion Community Forum](https://www.syncfusion.com/forums) or [Syncfusion Support](https://www.syncfusion.com/support).
+- To report an issue specific to this sample, open a GitHub issue in this repository.
+
+## License
+
+This is a Syncfusion sample project provided to demonstrate product usage. Review the [Syncfusion license terms](https://www.syncfusion.com/sales/pricing?category=ui-components) before using Syncfusion components in your own applications.
